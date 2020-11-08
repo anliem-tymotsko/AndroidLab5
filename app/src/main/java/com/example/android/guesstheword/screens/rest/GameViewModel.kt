@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.guesstheword.screens.game
+package com.example.android.guesstheword.screens.rest
 
 import android.os.CountDownTimer
 import android.text.format.DateUtils
@@ -85,6 +85,10 @@ class GameViewModel : ViewModel() {
     // The list of words - the front of the list is the next word to guess
     private lateinit var wordList: MutableList<String>
 
+    private val _eventNeedNewTable = MutableLiveData<Boolean>()
+    val eventNeedNewTable: LiveData<Boolean>
+        get() = _eventNeedNewTable
+
     // Event which triggers the end of the game
     private val _eventGameFinish = MutableLiveData<Boolean>()
     val eventGameFinish: LiveData<Boolean>
@@ -96,10 +100,8 @@ class GameViewModel : ViewModel() {
         get() = _eventBuzz
 
     init {
-        resetList()
-        nextWord()
         _score.value = 0
-
+        _eventNeedNewTable.value = false
         // Creates a timer which triggers the end of the game when it finishes
         timer = object : CountDownTimer(COUNTDOWN_TIME, ONE_SECOND) {
 
@@ -120,61 +122,14 @@ class GameViewModel : ViewModel() {
         timer.start()
     }
 
-    /**
-     * Resets the list of words and randomizes the order
-     */
-    private fun resetList() {
-        wordList = mutableListOf(
-                "queen",
-                "hospital",
-                "basketball",
-                "cat",
-                "change",
-                "snail",
-                "soup",
-                "calendar",
-                "sad",
-                "desk",
-                "guitar",
-                "home",
-                "railway",
-                "zebra",
-                "jelly",
-                "car",
-                "crow",
-                "trade",
-                "bag",
-                "roll",
-                "bubble"
-        )
-        wordList.shuffle()
-    }
 
-    /**
-     * Moves to the next word in the list
-     */
-    private fun nextWord() {
-        //Select and remove a word from the list
-        if (wordList.isEmpty()) {
-            resetList()
-        }
-        _word.value = wordList.removeAt(0)
-    }
-
-    /** Methods for buttons presses **/
-
-    fun onSkip() {
-        _score.value = (_score.value)?.minus(1)
-        nextWord()
-    }
 
     fun onCorrect() {
         _score.value = (_score.value)?.plus(1)
         _eventBuzz.value = BuzzType.CORRECT
-        nextWord()
     }
 
-    /** Methods for completed events **/
+
 
     fun onGameFinishComplete() {
         _eventGameFinish.value = false
@@ -188,4 +143,8 @@ class GameViewModel : ViewModel() {
         super.onCleared()
         timer.cancel()
     }
+    fun portionsFinishComplete() {
+        _eventNeedNewTable.value = true
+    }
+
 }
